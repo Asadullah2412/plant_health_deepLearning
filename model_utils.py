@@ -3,18 +3,21 @@ import numpy as np
 from PIL import Image
 from keras.layers import TFSMLayer
 
+
 model = TFSMLayer(
     "model/plant_model_serving",
     call_endpoint="serving_default"
 )
 
+
+
 class_names = [
-'Potato___Early_blight',
-'Potato___Late_blight',
-'Potato___healthy',
-'Tomato___Early_blight',
-'Tomato___Late_blight',
-'Tomato___healthy'
+'Potato Early blight',
+'Potato Late blight',
+'Potato healthy',
+'Tomato Early blight',
+'Tomato Late blight',
+'Tomato healthy'
 ]
 
 def predict_image(image):
