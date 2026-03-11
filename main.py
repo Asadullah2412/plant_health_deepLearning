@@ -1,6 +1,7 @@
 from fastapi import FastAPI, UploadFile, File
 from PIL import Image
 import io
+from llm_utils import generate_explanation
 
 from model_utils import predict_image
 
