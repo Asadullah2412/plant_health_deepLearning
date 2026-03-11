@@ -6,7 +6,7 @@ import cv2
 import base64
 
 from llm_utils import generate_explanation
-from model_utils import predict_image
+from model_utils import predict_image,is_leaf
 
 
 
@@ -16,33 +16,34 @@ app = FastAPI()
 def home():
     return {"message": "Plant Disease Detection API running"}
 
-@app.post('/predict')
+@app.post("/predict")
 async def predict(file: UploadFile = File(...)):
 
     contents = await file.read()
     image = Image.open(io.BytesIO(contents)).convert("RGB")
 
+    # STEP 1 → Leaf detection
+    if not is_leaf(image):
+        return {
+            "prediction": "Invalid Image",
+            "message": "Please upload a clear leaf image."
+        }
+
+    # STEP 2 → Disease detection
     label, confidence = predict_image(image)
-   
+
+    # STEP 3 → Confidence guard
     if confidence < 0.65:
         return {
             "prediction": "Uncertain",
             "message": "Image not clear. Please upload a clearer leaf photo."
         }
 
+    # STEP 4 → LLM explanation
     explanation = generate_explanation(label, confidence)
-
-    # convert image to numpy
-    img_np = np.array(image)
-    img_resized = cv2.resize(img_np, (224, 224))
-
-    img_array = np.expand_dims(img_resized / 255.0, axis=0)
-
-    
 
     return {
         "prediction": label,
         "confidence": round(confidence * 100, 1),
-        "explanation": explanation,
-        
+        "explanation": explanation
     }
